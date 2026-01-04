@@ -337,58 +337,77 @@ const getSystemInstruction = (customInstruction: string, template: typeof TEMPLA
   - 존재하지 않는 사이트 이름 절대 금지!
 
   ══════════════════════════════════════════════════════════════════
-  🔴 [6. CTA 버튼 - 심리 트리거로 클릭 유도!]
+  🔴 [6. CTA 버튼 - 글 맥락 분석 후 생성!]
   ══════════════════════════════════════════════════════════════════
   
-  ⛔ 절대 금지: "(클릭)", "지금 바로 시작하세요" 같은 평범한 문구!
+  ⚠️ CTA 생성 전 반드시 분석할 것:
   
-  ✅ 심리 트리거 문구 (반드시 이 중에서 선택):
+  1️⃣ 주제 카테고리 파악:
+  - 금융/지원금 → "신청하기", "계산하기", "조건 확인"
+  - 건강/다이어트 → "루틴 시작", "칼로리 확인", "비법 보기"
+  - 여행/맛집 → "코스 확인", "명소 찾기", "예약하기"
+  - 뷰티/패션 → "스타일 찾기", "추천 보기", "비교하기"
+  - IT/테크 → "사양 비교", "할인 정보", "리뷰 보기"
+  - 자기계발 → "시작하기", "팁 확인", "방법 보기"
+  - 육아/교육 → "정보 확인", "팁 보기", "비교하기"
+  - 요리/레시피 → "레시피 보기", "재료 확인", "따라하기"
   
-  [손실 회피 트리거]:
-  - "놓치면 후회할 혜택 확인하기"
-  - "이거 모르면 손해봅니다"
-  - "몰랐다간 수백만원 날립니다"
-  - "모르면 손해보는 꿀팁"
+  2️⃣ 독자가 원하는 것 파악:
+  - 정보가 필요한가? → "~인지 확인하기"
+  - 행동을 유도할까? → "~ 시작하기", "~ 따라하기"
+  - 비교/선택 도움? → "~ 비교하기", "TOP ~ 보기"
+  - 절약/혜택? → "~ 아끼는 법", "할인 정보"
   
-  [긴급성 트리거]:
-  - "마감 전에 꼭 확인하세요"
-  - "서둘러야 받을 수 있어요"
-  - "신청 기간 확인하기"
-  - "지금 안하면 늦어요"
+  ⛔ 절대 금지: 
+  - "(클릭)", "지금 바로 시작하세요" 같은 평범한 문구
+  - 같은 글 내에서 동일한 CTA 문구 반복 사용
+  - 예시 문구 그대로 복사 - 반드시 주제에 맞게 새로 작성!
+  - 금융 관련 아닌데 "신청하기", "지원금" 같은 문구 사용
   
-  [호기심 트리거]:
-  - "내 실수령액 계산해보기"
-  - "얼마나 받을 수 있는지 확인"
-  - "나도 대상자인지 확인하기"
-  - "숨겨진 혜택 찾기"
+  ✅ 심리 트리거 유형 (모든 주제에 적용 가능):
   
-  [사회적 증거 트리거]:
-  - "이미 10만명이 받았어요"
-  - "다들 신청했다는 그 혜택"
-  - "모두가 받고 있는 혜택"
-  - "받은 사람들만 아는 비밀"
+  [손실 회피]: "놓치면 후회할 ~", "모르면 손해보는 ~", "안 하면 ~"
+  [긴급성]: "~ 전에 꼭 확인", "서둘러 ~", "지금 안하면 ~"
+  [호기심]: "내 ~ 확인하기", "~인지 알아보기", "숨겨진 ~ 찾기"
+  [사회적 증거]: "~만명이 선택한", "다들 ~하는", "인기 ~"
+  [독점성]: "아는 사람만 ~", "~ 만 아는 비법", "특별 ~"
+  [숫자/결과]: "~kg 감량", "~일만에", "~% 효과", "TOP ~"
+  [도전/동기]: "포기하지 마세요", "~ 도전하기", "~ 시작하기"
   
-  [독점성 트리거]:
-  - "아는 사람만 받는 혜택"
-  - "숨겨진 혜택 확인하기"
-  - "특별 혜택 받는 방법"
-  - "1% 만 아는 정보"
+  ⚠️ 핵심 규칙:
+  1. CTA 버튼 3개 모두 서로 다른 트리거 유형 사용!
+  2. 글 주제와 맥락에 맞는 동사/명사 사용!
+  3. 아래 예시는 참고용! 그대로 쓰지 말고 주제에 맞게 새로 작성!
   
-  [구체적 숫자 트리거]:
-  - "최대 5천만원 받는 방법"
-  - "월 10만원 절약하는 법"
-  - "500만원 더 받기"
-  - "연 120만원 아끼는 법"
+  📌 예시 (주제: "청년도약계좌"):
+  - CTA1: "💰 내 예상 이자 계산해보기" (호기심)
+  - CTA2: "📢 이미 50만명이 가입했어요" (사회적 증거)  
+  - CTA3: "🔥 마감 전에 꼭 신청하세요" (긴급성)
+  
+  📌 예시 (주제: "다이어트 식단표"):
+  - CTA1: "📊 나에게 맞는 칼로리 확인하기" (호기심)
+  - CTA2: "💪 2주 루틴 따라하기" (도전/동기)
+  - CTA3: "🔥 작심삼일 탈출 비법 보기" (손실 회피)
+  
+  📌 예시 (주제: "제주도 여행 코스"):
+  - CTA1: "🗺️ 숨겨진 명소 찾기" (독점성)
+  - CTA2: "✈️ 인기 코스 TOP5 보기" (사회적 증거)
+  - CTA3: "🎯 여행 체크리스트 확인하기" (호기심)
+  
+  📌 예시 (주제: "피부관리 루틴"):
+  - CTA1: "✨ 내 피부타입 알아보기" (호기심)
+  - CTA2: "🧴 피부과 의사가 추천하는 ~" (사회적 증거)
+  - CTA3: "💎 모르면 손해보는 관리법" (손실 회피)
   
   📌 CTA 버튼 스타일:
   
   [일반 CTA] (첫 번째 H2 후, 두 번째 H2 후):
-  <a href="#" style="display:block !important; text-align:center !important; padding:22px 44px !important; background:${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:18px !important; font-weight:900 !important; font-size:20px !important; box-shadow:0 12px 30px rgba(0,0,0,0.25), inset 0 -3px 0 rgba(0,0,0,0.1) !important; margin:35px auto !important; max-width:480px !important; letter-spacing:-0.3px !important; text-shadow:0 2px 4px rgba(0,0,0,0.2) !important;">💰 내 실수령액 계산해보기</a>
+  <a href="#" style="display:block !important; text-align:center !important; padding:22px 44px !important; background:\${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:18px !important; font-weight:900 !important; font-size:20px !important; box-shadow:0 12px 30px rgba(0,0,0,0.25), inset 0 -3px 0 rgba(0,0,0,0.1) !important; margin:35px auto !important; max-width:480px !important; letter-spacing:-0.3px !important; text-shadow:0 2px 4px rgba(0,0,0,0.2) !important;">[이모지] [주제에 맞는 CTA 문구]</a>
   
   [라스트팡 CTA] (마무리 섹션):
-  <a href="#" style="display:block !important; text-align:center !important; padding:26px 52px !important; background:${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:22px !important; font-weight:900 !important; font-size:24px !important; box-shadow:0 18px 45px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15), inset 0 -4px 0 rgba(0,0,0,0.12) !important; margin:45px auto 25px !important; max-width:520px !important; letter-spacing:-0.5px !important; text-shadow:0 2px 6px rgba(0,0,0,0.25) !important; border:3px solid rgba(255,255,255,0.3) !important;">🔥 놓치면 후회할 혜택 확인하기</a>
+  <a href="#" style="display:block !important; text-align:center !important; padding:26px 52px !important; background:\${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:22px !important; font-weight:900 !important; font-size:24px !important; box-shadow:0 18px 45px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15), inset 0 -4px 0 rgba(0,0,0,0.12) !important; margin:45px auto 25px !important; max-width:520px !important; letter-spacing:-0.5px !important; text-shadow:0 2px 6px rgba(0,0,0,0.25) !important; border:3px solid rgba(255,255,255,0.3) !important;">🔥 [주제에 맞는 강력한 CTA 문구]</a>
   
-  ⚠️ 주의: 각 CTA는 다른 문구 사용! 같은 문구 반복 금지!
+  ⚠️ 다시 한번 강조: 3개 CTA 버튼 모두 다른 문구 사용! 복붙 금지!
 
   ══════════════════════════════════════════════════════════════════
   🔴 [7. 자연스러운 마무리]
