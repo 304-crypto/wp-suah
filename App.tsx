@@ -57,11 +57,30 @@ const App: React.FC = () => {
     return kstTime.toISOString().slice(0, 16);
   };
 
-  const [scheduleConfig, setScheduleConfig] = useState({
-    status: 'draft' as 'draft' | 'publish' | 'future',
-    startTime: getKSTDate(),
-    interval: 30
-  });
+  // 스케줄 설정 불러오기 (localStorage에서)
+  const getInitialScheduleConfig = () => {
+    try {
+      const saved = localStorage.getItem('wp-schedule-config');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        console.log('📅 스케줄 설정 복원됨');
+        return {
+          status: parsed.status || 'draft',
+          startTime: parsed.startTime || getKSTDate(),
+          interval: parsed.interval || 30
+        };
+      }
+    } catch (e) {
+      console.error('스케줄 설정 불러오기 실패:', e);
+    }
+    return {
+      status: 'draft' as 'draft' | 'publish' | 'future',
+      startTime: getKSTDate(),
+      interval: 30
+    };
+  };
+
+  const [scheduleConfig, setScheduleConfig] = useState(getInitialScheduleConfig());
 
   // ═══════════════════════════════════════════════════════════
   // 📥 앱 시작 시 localStorage에서 설정 불러오기 + 마이그레이션
@@ -139,6 +158,18 @@ const App: React.FC = () => {
       }
     }
   }, [appSettings, isConfigLoaded]);
+
+  // 💾 스케줄 설정 변경 시 자동 저장
+  useEffect(() => {
+    if (isConfigLoaded) {
+      try {
+        localStorage.setItem('wp-schedule-config', JSON.stringify(scheduleConfig));
+        console.log('📅 스케줄 설정 저장됨');
+      } catch (e) {
+        console.error('스케줄 저장 실패:', e);
+      }
+    }
+  }, [scheduleConfig, isConfigLoaded]);
 
   const refreshStats = useCallback(async (config: WordPressConfig) => {
     if (!config?.siteUrl) return;
