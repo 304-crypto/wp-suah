@@ -1,9 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { AppStatus, WordPressConfig, GeneratedPost, BulkItem, DashboardStats, SiteProfile, AppSettings } from './types';
 import { generateSEOContent } from './services/geminiService';
 import { publishToWordPress, fetchPostStats, fetchScheduledPosts, uploadMediaToWordPress } from './services/wordPressService';
+import { supabase, loginWithPassword, logout, getCurrentUser, loadSettingsFromCloud, saveSettingsToCloud, getPendingCommands, markCommandProcessed, updateBotStatus } from './services/supabaseService';
+import { notifyPublishSuccess, notifyPublishFailed, notifyBatchStart, notifyBatchComplete, notifyPaused, notifyResumed, notifyStatus } from './services/telegramService';
 import SettingsModal from './components/SettingsModal';
 import PreviewModal from './components/PreviewModal';
+import AuthModal from './components/AuthModal';
+import type { User } from '@supabase/supabase-js';
 
 // ═══════════════════════════════════════════════════════════
 // 🎯 기본 설정값
@@ -33,7 +37,15 @@ const DEFAULT_SETTINGS: AppSettings = {
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'writer' | 'manager'>('writer');
-  const [bulkInput, setBulkInput] = useState('');
+
+  // 🆕 글 작성 목록 자동저장 (localStorage에서 불러오기)
+  const [bulkInput, setBulkInput] = useState(() => {
+    try {
+      return localStorage.getItem('wp-bulk-input') || '';
+    } catch {
+      return '';
+    }
+  });
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
   const [queue, setQueue] = useState<BulkItem[]>([]);
 
@@ -47,6 +59,14 @@ const App: React.FC = () => {
   const [publishedPosts, setPublishedPosts] = useState<GeneratedPost[]>([]);
   const [stats, setStats] = useState<DashboardStats>({ unprocessed: 0, localPending: 0, wpDraft: 0, wpFuture: 0, wpPublish: 0 });
   const [globalError, setGlobalError] = useState<string | null>(null);
+
+  // 🔐 인증 상태
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+
+  // ⏸️ 일시정지 상태
+  const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef = useRef(false);
 
   // 스케줄링 설정 (한국표준시 기반)
   const getKSTDate = () => {
@@ -81,6 +101,70 @@ const App: React.FC = () => {
   };
 
   const [scheduleConfig, setScheduleConfig] = useState(getInitialScheduleConfig());
+
+  // ═══════════════════════════════════════════════════════════
+  // 🔐 앱 시작 시 인증 상태 확인
+  // ═══════════════════════════════════════════════════════════
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const sessionUser = data.session?.user ?? null;
+      setUser(sessionUser);
+      console.log(sessionUser ? '🔐 로그인됨:' : '🔓 비로그인');
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  // ═══════════════════════════════════════════════════════════
+  // 🤖 Telegram 봇 명령어 폴링 (5초마다)
+  // ═══════════════════════════════════════════════════════════
+  useEffect(() => {
+    if (!user) return;
+
+    const pollCommands = async () => {
+      const commands = await getPendingCommands(user.id);
+
+      for (const cmd of commands) {
+        switch (cmd.command) {
+          case 'pause':
+            setIsPaused(true);
+            isPausedRef.current = true;
+            notifyPaused();
+            break;
+          case 'resume':
+            setIsPaused(false);
+            isPausedRef.current = false;
+            notifyResumed();
+            break;
+          case 'status':
+            const completed = queue.filter(q => q.status === 'completed').length;
+            const failed = queue.filter(q => q.status === 'failed').length;
+            const pending = queue.filter(q => q.status === 'pending').length;
+            const current = queue.find(q => q.status === 'generating' || q.status === 'publishing');
+
+            notifyStatus({
+              isPaused: isPausedRef.current,
+              queueLength: pending,
+              completedCount: completed,
+              failedCount: failed,
+              currentItem: current?.topic.split('///')[0]
+            });
+            break;
+        }
+
+        await markCommandProcessed(cmd.id);
+      }
+    };
+
+    const interval = setInterval(pollCommands, 5000);
+    return () => clearInterval(interval);
+  }, [user, queue, isPaused]);
 
   // ═══════════════════════════════════════════════════════════
   // 📥 앱 시작 시 localStorage에서 설정 불러오기 + 마이그레이션
@@ -146,18 +230,59 @@ const App: React.FC = () => {
   }, []);
 
   // ═══════════════════════════════════════════════════════════
-  // 💾 설정이 변경될 때마다 자동으로 localStorage에 저장
+  // 💾 설정이 변경될 때마다 자동으로 localStorage + 클라우드에 저장
   // ═══════════════════════════════════════════════════════════
   useEffect(() => {
     if (isConfigLoaded && appSettings.profiles.length > 0) {
       try {
         localStorage.setItem('wp-multi-site-settings', JSON.stringify(appSettings));
         console.log('💾 멀티사이트 설정 자동 저장됨');
+
+        // 🆕 로그인 상태면 클라우드에도 저장
+        if (user) {
+          saveSettingsToCloud(user.id, appSettings);
+        }
       } catch (e) {
         console.error('❌ 설정 저장 실패:', e);
       }
     }
-  }, [appSettings, isConfigLoaded]);
+  }, [appSettings, isConfigLoaded, user]);
+
+  // ═══════════════════════════════════════════════════════════
+  // ☁️ 로그인 시 클라우드에서 설정 불러오기
+  // ═══════════════════════════════════════════════════════════
+  useEffect(() => {
+    if (!user) return;
+
+    const loadFromCloud = async () => {
+      const cloudSettings = await loadSettingsFromCloud(user.id);
+      if (cloudSettings && cloudSettings.profiles.length > 0) {
+        console.log('☁️ 클라우드 설정으로 덮어쓰기');
+        setAppSettings(cloudSettings);
+
+        if (cloudSettings.currentProfileId) {
+          const profile = cloudSettings.profiles.find(p => p.id === cloudSettings.currentProfileId);
+          if (profile) {
+            setCurrentProfile(profile);
+            refreshStats(profile.config);
+          }
+        }
+      }
+    };
+
+    loadFromCloud();
+  }, [user]);
+
+  // 💾 글 작성 목록 변경 시 자동 저장
+  useEffect(() => {
+    if (isConfigLoaded) {
+      try {
+        localStorage.setItem('wp-bulk-input', bulkInput);
+      } catch (e) {
+        console.error('글 목록 저장 실패:', e);
+      }
+    }
+  }, [bulkInput, isConfigLoaded]);
 
   // 💾 스케줄 설정 변경 시 자동 저장
   useEffect(() => {
@@ -365,7 +490,11 @@ const App: React.FC = () => {
       setQueue(prev => prev.map((it, idx) => idx === index ? { ...it, status: 'completed', result: post } : it));
       refreshStats(config);
 
+      // 🆕 개별 발행 성공 알림
+      notifyPublishSuccess(post.title, config.siteUrl);
+
     } catch (e: any) {
+      const title = items[index].topic.split('///')[0];
       setQueue(prev => prev.map((it, idx) => {
         if (idx === index) {
           return {
@@ -377,6 +506,9 @@ const App: React.FC = () => {
         }
         return it;
       }));
+
+      // 🆕 개별 발행 실패 알림
+      notifyPublishFailed(title, e.message || '알 수 없는 오류');
     }
   };
 
@@ -423,11 +555,28 @@ const App: React.FC = () => {
 
     setQueue(items);
     setStatus(AppStatus.PROCESSING);
+    setIsPaused(false);
+    isPausedRef.current = false;
+
+    // 텔레그램 배치 시작 알림
+    notifyBatchStart(items.length);
+
+    let successCount = 0;
+    let failCount = 0;
 
     for (let i = 0; i < items.length; i++) {
-      await processQueueItem(i, config, items);
+      // 일시정지 대기
+      while (isPausedRef.current) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      const result = await processQueueItem(i, config, items);
+      if (result === 'success') successCount++;
+      else failCount++;
     }
 
+    // 텔레그램 배치 완료 알림
+    notifyBatchComplete(successCount, failCount);
     setStatus(AppStatus.IDLE);
   };
 
@@ -482,6 +631,36 @@ const App: React.FC = () => {
                 <button onClick={() => setActiveTab('writer')} className={`px-6 py-2.5 rounded-xl font-black text-sm transition-all ${activeTab === 'writer' ? 'bg-white text-indigo-600 shadow-md' : 'text-slate-500'}`}>자동 집필</button>
                 <button onClick={() => { setActiveTab('manager'); loadPublishedPosts(); }} className={`px-6 py-2.5 rounded-xl font-black text-sm transition-all ${activeTab === 'manager' ? 'bg-white text-indigo-600 shadow-md' : 'text-slate-500'}`}>발행 관리</button>
               </div>
+
+              {/* 일시정지/재개 버튼 (작업 중일 때만) */}
+              {status === AppStatus.PROCESSING && (
+                <button
+                  onClick={() => {
+                    setIsPaused(!isPaused);
+                    isPausedRef.current = !isPaused;
+                    if (!isPaused) notifyPaused();
+                    else notifyResumed();
+                  }}
+                  className={`px-4 py-2.5 rounded-xl font-black text-sm transition-all shadow-md ${isPaused ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-amber-500 text-white hover:bg-amber-600'}`}
+                >
+                  <i className={`fa-solid ${isPaused ? 'fa-play' : 'fa-pause'} mr-2`}></i>
+                  {isPaused ? '재개' : '일시정지'}
+                </button>
+              )}
+
+              {/* 로그인 버튼 */}
+              {!user && (
+                <button
+                  onClick={() => setIsAuthOpen(true)}
+                  className="px-4 py-2.5 rounded-xl border-2 border-indigo-200 font-black text-sm text-indigo-600 hover:bg-indigo-50 transition-all"
+                >
+                  <i className="fa-solid fa-cloud mr-2"></i>
+                  <span className="hidden lg:inline">클라우드 동기화</span>
+                  <span className="lg:hidden">로그인</span>
+                </button>
+              )}
+
+              {/* 설정 버튼 */}
               <button onClick={() => setIsSettingsOpen(true)} className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl border-2 flex items-center justify-center text-slate-400 hover:text-indigo-600 bg-white transition-all shadow-sm">
                 <i className="fa-solid fa-gear text-lg md:text-xl"></i>
               </button>
@@ -819,6 +998,15 @@ const App: React.FC = () => {
         isOpen={!!previewPost}
         post={previewPost}
         onClose={() => setPreviewPost(null)}
+      />
+
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onLoginSuccess={() => {
+          console.log('✅ 로그인 성공, 클라우드 동기화 활성화');
+          setIsAuthOpen(false);
+        }}
       />
     </div>
   );
