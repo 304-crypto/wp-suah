@@ -153,6 +153,13 @@ const getSystemInstruction = (customInstruction: string, template: typeof TEMPLA
   ❌ "오늘은 ~에 대해 알아보겠습니다" 같은 AI 말투 절대 금지
   ❌ "결론적으로", "정리하면", "FAQ", "Q&A", "마무리", "서론입니다" 표현 절대 금지
   
+  🔗 링크 관련 절대 금지 (블로그 신뢰성 핵심!):
+  ❌ href="#" ← 빈 링크 절대 금지! 신뢰도 하락!
+  ❌ href="https://example.com" ← 예시 링크 절대 금지!
+  ❌ 존재하지 않는 URL 절대 금지!
+  ❌ 개인 블로그 링크 금지 (blog.naver.com, tistory.com)
+  ✅ 모르면 구글 검색: https://www.google.com/search?q=키워드
+  
   ✅ HTML 스타일 태그만 사용! (예: <strong>, <em>, <h2>, <h3>)
   ✅ 강조는 <strong>텍스트</strong>로!
   ✅ 기울임은 <em>텍스트</em>로!
@@ -281,52 +288,68 @@ const getSystemInstruction = (customInstruction: string, template: typeof TEMPLA
   </div>
 
   ══════════════════════════════════════════════════════════════════
-  🔴 [5. 하이퍼링크 - 공신력 있는 외부 링크 필수!]
+  🔴 [5. 하이퍼링크 - 실제 목표 페이지로 연결!]
   ══════════════════════════════════════════════════════════════════
   
-  ⚠️ 링크 규칙 (매우 중요!):
+  ⚠️ 링크 규칙 (매우 중요! - 블로그 신뢰성의 핵심!)
   
-  ✅ 반드시 사용해야 할 링크 (우선순위):
+  📌 핵심 원칙: 독자가 클릭하면 실제 정보에 도달해야 함!
   
-  1. 정부/공공기관 공식 사이트 (.go.kr, .gov.kr):
-     - 고용노동부: https://www.moel.go.kr
-     - 금융감독원: https://www.fss.or.kr
-     - 소상공인시장진흥공단: https://www.semas.or.kr
-     - 국세청: https://www.nts.go.kr
-     - 복지로: https://www.bokjiro.go.kr
+  ✅ 주제별 실제 목표 URL 예시 (이렇게 구체적으로!):
   
-  2. 금융기관/대기업 공식 사이트:
-     - 신한은행: https://www.shinhan.com
-     - KB국민은행: https://www.kbstar.com
-     - 카카오뱅크: https://www.kakaobank.com
+  [금융/정책 관련]:
+  - 청년도약계좌 → https://www.kinfa.or.kr (서민금융진흥원)
+  - 청년희망적금 → https://www.kinfa.or.kr
+  - 소상공인 지원 → https://www.semas.or.kr/web/main/index.kmdc
+  - 고용 지원금 → https://www.moel.go.kr
+  - 세금 관련 → https://www.nts.go.kr
+  - 복지 혜택 → https://www.bokjiro.go.kr
+  - 금융 민원 → https://www.fss.or.kr
   
-  3. 주요 언론사 기사:
-     - 네이버 뉴스: https://news.naver.com
-     - 조선일보: https://www.chosun.com
-     - 중앙일보: https://www.joongang.co.kr
+  [은행별 상품]:
+  - KB국민은행 → https://www.kbstar.com
+  - 신한은행 → https://www.shinhan.com
+  - 하나은행 → https://www.hanabank.com
+  - 우리은행 → https://www.wooribank.com
+  - 카카오뱅크 → https://www.kakaobank.com
+  - 토스뱅크 → https://www.tossbank.com
   
-  4. 위키백과만 허용:
-     - https://ko.wikipedia.org/wiki/검색어
+  [건강/의료]:
+  - 건강보험 → https://www.nhis.or.kr
+  - 의료 정보 → https://www.health.kr
+  - 질병관리청 → https://www.kdca.go.kr
   
-  5. 구글 검색 결과 (적절한 링크 없을 때만):
-     - 형식: https://www.google.com/search?q=키워드1+키워드2
-     - 예: https://www.google.com/search?q=소상공인+지원사업
+  [생활/행정]:
+  - 정부24 → https://www.gov.kr
+  - 법률 정보 → https://www.law.go.kr
+  - 주민센터 업무 → https://www.gov.kr
+  - 주택 정보 → https://www.myhome.go.kr
+  - 부동산 → https://www.reb.or.kr
   
-  ❌ 절대 사용 금지:
-  - "#" (빈 링크)
-  - "https://example.com" (예시 링크)
-  - 나무위키 (namu.wiki) - 신뢰도 낮음
-  - 개인 블로그 (blog.naver.com, tistory.com, velog.io)
-  - 브런치 (brunch.co.kr)
-  - 존재하지 않는 사이트 (예: "내국위키", "정책위키" 등)
+  [취업/교육]:
+  - 취업 지원 → https://www.work.go.kr
+  - 직업훈련 → https://www.hrd.go.kr
+  - 국민내일배움카드 → https://www.hrd.go.kr
   
-  📌 링크 텍스트 작성법 (매우 중요!):
+  [기타]:
+  - 위키백과 → https://ko.wikipedia.org/wiki/주제명
+  - 네이버 뉴스 → https://news.naver.com
+  
+  🚨 구글 검색은 최후의 수단! (위 목록에 없을 때만):
+  - 형식: https://www.google.com/search?q=구체적+키워드
+  - 예: https://www.google.com/search?q=2026년+청년+전세자금대출+조건
+  
+  🚨 절대 사용 금지:
+  - href="#" ← 절대 금지!
+  - href="https://example.com" ← 절대 금지!
+  - 나무위키, 개인 블로그, 브런치 ← 금지!
+  
+  📌 링크 텍스트 작성법:
   
   ✅ 좋은 예:
-  - "<a href="https://www.semas.or.kr">소상공인시장진흥공단 공식 사이트</a>에서 자세히 확인할 수 있어요"
-  - "<a href="https://www.moel.go.kr">고용노동부</a>에서 안내하는 내용을 보면요"
-  - "<a href="https://www.google.com/search?q=소상공인+지원사업">소상공인 지원사업 검색</a>해보시면 도움될 거예요"
-  - "<a href="https://www.shinhan.com">신한은행 홈페이지</a>를 방문해보세요"
+  - "<a href="https://www.kinfa.or.kr">서민금융진흥원 공식 사이트</a>에서 신청할 수 있어요"
+  - "<a href="https://www.nhis.or.kr">국민건강보험공단</a>에서 확인해보세요"
+  - "<a href="https://www.work.go.kr">워크넷</a>에서 채용정보를 찾아보세요"
   
   ❌ 나쁜 예:
   - "내국위키에서 확인하기" (존재하지 않는 사이트)
@@ -411,10 +434,10 @@ const getSystemInstruction = (customInstruction: string, template: typeof TEMPLA
   📌 CTA 버튼 스타일:
   
   [일반 CTA] (첫 번째 H2 후, 두 번째 H2 후):
-  <a href="#" style="display:block !important; text-align:center !important; padding:22px 44px !important; background:${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:18px !important; font-weight:900 !important; font-size:20px !important; box-shadow:0 12px 30px rgba(0,0,0,0.25), inset 0 -3px 0 rgba(0,0,0,0.1) !important; margin:35px auto !important; max-width:480px !important; letter-spacing:-0.3px !important; text-shadow:0 2px 4px rgba(0,0,0,0.2) !important;">[이모지] [주제에 맞는 CTA 문구]</a>
+  <a href="javascript:void(0)" style="display:block !important; text-align:center !important; padding:22px 44px !important; background:${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:18px !important; font-weight:900 !important; font-size:20px !important; box-shadow:0 12px 30px rgba(0,0,0,0.25), inset 0 -3px 0 rgba(0,0,0,0.1) !important; margin:35px auto !important; max-width:480px !important; letter-spacing:-0.3px !important; text-shadow:0 2px 4px rgba(0,0,0,0.2) !important;">[이모지] [주제에 맞는 CTA 문구]</a>
   
   [라스트팡 CTA] (마무리 섹션 - 반드시 작성!):
-  <a href="#" style="display:block !important; text-align:center !important; padding:26px 52px !important; background:${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:22px !important; font-weight:900 !important; font-size:24px !important; box-shadow:0 18px 45px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15), inset 0 -4px 0 rgba(0,0,0,0.12) !important; margin:45px auto 25px !important; max-width:520px !important; letter-spacing:-0.5px !important; text-shadow:0 2px 6px rgba(0,0,0,0.25) !important; border:3px solid rgba(255,255,255,0.3) !important;">🔥 [주제에 맞는 강력한 CTA 문구]</a>
+  <a href="javascript:void(0)" style="display:block !important; text-align:center !important; padding:26px 52px !important; background:${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:22px !important; font-weight:900 !important; font-size:24px !important; box-shadow:0 18px 45px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15), inset 0 -4px 0 rgba(0,0,0,0.12) !important; margin:45px auto 25px !important; max-width:520px !important; letter-spacing:-0.5px !important; text-shadow:0 2px 6px rgba(0,0,0,0.25) !important; border:3px solid rgba(255,255,255,0.3) !important;">🔥 [주제에 맞는 강력한 CTA 문구]</a>
   
   ⚠️ 다시 한번 강조: 3개 CTA 버튼 모두 다른 문구 사용! 복붙 금지!
 
