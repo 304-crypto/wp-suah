@@ -130,20 +130,20 @@ export const renderThumbnailToBase64 = async (config: ThumbnailConfig): Promise<
   ctx.strokeRect(borderWidth / 2, borderWidth / 2, canvas.width - borderWidth, canvas.height - borderWidth);
 
   // ═══════════════════════════════════════════════════════════
-  // 2. 텍스트 영역 설정 (적절한 여백)
+  // 2. 텍스트 영역 설정 (여백 최소화로 최대한 채우기)
   // ═══════════════════════════════════════════════════════════
-  const padding = 45; // 좌우 여백 (너무 많지 않게)
+  const padding = 35; // 좌우 여백 줄임
   const maxWidth = canvas.width - (padding * 2);
 
   // 텍스트 정리 (HTML 태그 제거)
   const text = config.text.replace(/<[^>]*>/g, '').trim();
 
   // ═══════════════════════════════════════════════════════════
-  // 3. 폰트 크기 자동 조절 (70px → 34px)
+  // 3. 폰트 크기 최대화 (90px부터 시작해서 최대한 크게!)
   // ═══════════════════════════════════════════════════════════
-  const fontSizes = [70, 64, 58, 52, 48, 44, 40, 36, 34];
+  const fontSizes = [90, 85, 80, 75, 70, 65, 60, 56, 52, 48, 44, 40, 36];
   let lines: string[] = [];
-  let finalFontSize = 52;
+  let finalFontSize = 60;
 
   for (const fontSize of fontSizes) {
     ctx.font = `900 ${fontSize}px 'NanumSquareNeo', 'Pretendard', sans-serif`;
@@ -152,7 +152,7 @@ export const renderThumbnailToBase64 = async (config: ThumbnailConfig): Promise<
     // 모든 줄이 maxWidth 안에 들어오는지 확인
     const allFit = lines.every(line => ctx.measureText(line).width <= maxWidth);
 
-    // 3줄 이하이고 모든 줄이 들어오면 OK
+    // 3줄 이하이고 모든 줄이 들어오면 → 이 폰트 사용!
     if (lines.length <= 3 && allFit) {
       finalFontSize = fontSize;
       break;
@@ -164,13 +164,13 @@ export const renderThumbnailToBase64 = async (config: ThumbnailConfig): Promise<
   lines = balancedWrap(ctx, text, maxWidth);
 
   // ═══════════════════════════════════════════════════════════
-  // 4. 중앙 정렬 렌더링
+  // 4. 중앙 정렬 렌더링 (줄 간격 타이트하게)
   // ═══════════════════════════════════════════════════════════
-  const lineHeight = finalFontSize * 1.35; // 줄 간격
+  const lineHeight = finalFontSize * 1.2; // 줄 간격 더 타이트하게
   const totalHeight = lines.length * lineHeight;
 
-  // 수직 중앙 정렬 (위아래 여백 동일)
-  let y = (canvas.height - totalHeight) / 2 + finalFontSize * 0.25;
+  // 수직 중앙 정렬
+  let y = (canvas.height - totalHeight) / 2 + finalFontSize * 0.15;
 
   ctx.fillStyle = theme.text;
   ctx.textAlign = 'center';
