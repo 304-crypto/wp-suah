@@ -219,3 +219,53 @@ export const fetchScheduledPosts = async (config: WordPressConfig): Promise<Gene
     return [];
   }
 };
+
+/**
+ * 이미지를 WordPress 미디어 라이브러리에 업로드
+ * FIFU 플러그인 호환을 위해 실제 URL 반환
+ */
+export const uploadMediaToWordPress = async (
+  config: WordPressConfig,
+  base64Data: string,
+  filename: string
+): Promise<string | null> => {
+  try {
+    const baseUrl = getBaseUrl(config.siteUrl);
+
+    // base64 데이터에서 실제 바이너리 추출
+    const base64Content = base64Data.replace(/^data:image\/\w+;base64,/, '');
+    const binaryString = atob(base64Content);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: 'image/webp' });
+
+    // FormData로 파일 업로드
+    const formData = new FormData();
+    formData.append('file', blob, `${filename}.webp`);
+
+    const response = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
+      method: 'POST',
+      headers: {
+        ...getAuthHeader(config)
+        // Content-Type은 FormData가 자동 설정
+      },
+      body: formData,
+      mode: 'cors'
+    });
+
+    if (!response.ok) {
+      console.warn('미디어 업로드 실패:', response.status);
+      return null;
+    }
+
+    const media = await response.json();
+    console.log('✅ 미디어 업로드 성공:', media.source_url);
+    return media.source_url;
+
+  } catch (e) {
+    console.warn('미디어 업로드 오류:', e);
+    return null;
+  }
+};
