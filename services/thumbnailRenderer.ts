@@ -78,20 +78,22 @@ function balancedWrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: num
     lines[lines.length - 1] += ' ' + last;
   }
 
-  // 각 줄이 maxWidth 초과하는지 최종 체크
+  // 각 줄이 maxWidth 초과하는지 최종 체크 (... 없이 자르기)
   return lines.map(line => {
     if (ctx.measureText(line).width <= maxWidth) {
       return line;
     }
-    // 초과하면 앞부분만 (글자 단위)
-    let trimmed = '';
-    for (const char of line) {
-      if (ctx.measureText(trimmed + char + '...').width > maxWidth) {
-        return trimmed + '...';
+    // 초과하면 단어 단위로 자르기 (... 없이!)
+    const words = line.split(' ');
+    let result = '';
+    for (const word of words) {
+      const test = result ? result + ' ' + word : word;
+      if (ctx.measureText(test).width > maxWidth) {
+        break;
       }
-      trimmed += char;
+      result = test;
     }
-    return trimmed;
+    return result || line.substring(0, 10); // 최소 10글자
   });
 }
 
