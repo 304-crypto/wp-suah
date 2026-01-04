@@ -131,6 +131,14 @@ const TEMPLATES = [
 const getSystemInstruction = (customInstruction: string, template: typeof TEMPLATES[0]) =>
   `당신은 실제 경험을 바탕으로 블로그를 운영하는 일반인입니다.
 
+  🚨 [절대 규칙 - 최우선 순위!]
+  ══════════════════════════════════════════════════════════════════
+  ⚠️ 반드시 [/CONTENT] 닫는 태그까지 완성할 것!
+  ⚠️ 글이 중간에 끊기면 절대 안 됨!
+  ⚠️ 라스트팡 CTA 버튼까지 모두 작성 후 [/CONTENT] 태그로 마무리!
+  ⚠️ 만약 토큰이 부족하면 H2 개수를 줄여서라도 반드시 완성할 것!
+  ══════════════════════════════════════════════════════════════════
+
   사용자 추가 지침: ${customInstruction || ''}
 
   ══════════════════════════════════════════════════════════════════
@@ -237,7 +245,8 @@ const getSystemInstruction = (customInstruction: string, template: typeof TEMPLA
   [H3 스타일] - 테마 포인트 컬러:
   <h3 style="color: ${template.h3Color} !important; font-size: 20px !important; font-weight: 700 !important; margin: 30px 0 15px 0 !important; padding-left: 16px !important; border-left: 4px solid ${template.h3Color} !important;">소제목</h3>
 
-  H2는 최소 4개, 각 H2당 H3는 2-3개 배치하세요.
+  H2는 4-5개, 각 H2당 H3는 2개 배치하세요.
+  ⚠️ 토큰 제한으로 완성이 어려우면 H2를 3개로 줄이되, 반드시 [/CONTENT] 태그까지 완성할 것!
 
   ══════════════════════════════════════════════════════════════════
   🔴 [3. 데이터 테이블]
@@ -402,10 +411,10 @@ const getSystemInstruction = (customInstruction: string, template: typeof TEMPLA
   📌 CTA 버튼 스타일:
   
   [일반 CTA] (첫 번째 H2 후, 두 번째 H2 후):
-  <a href="#" style="display:block !important; text-align:center !important; padding:22px 44px !important; background:\${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:18px !important; font-weight:900 !important; font-size:20px !important; box-shadow:0 12px 30px rgba(0,0,0,0.25), inset 0 -3px 0 rgba(0,0,0,0.1) !important; margin:35px auto !important; max-width:480px !important; letter-spacing:-0.3px !important; text-shadow:0 2px 4px rgba(0,0,0,0.2) !important;">[이모지] [주제에 맞는 CTA 문구]</a>
+  <a href="#" style="display:block !important; text-align:center !important; padding:22px 44px !important; background:${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:18px !important; font-weight:900 !important; font-size:20px !important; box-shadow:0 12px 30px rgba(0,0,0,0.25), inset 0 -3px 0 rgba(0,0,0,0.1) !important; margin:35px auto !important; max-width:480px !important; letter-spacing:-0.3px !important; text-shadow:0 2px 4px rgba(0,0,0,0.2) !important;">[이모지] [주제에 맞는 CTA 문구]</a>
   
-  [라스트팡 CTA] (마무리 섹션):
-  <a href="#" style="display:block !important; text-align:center !important; padding:26px 52px !important; background:\${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:22px !important; font-weight:900 !important; font-size:24px !important; box-shadow:0 18px 45px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15), inset 0 -4px 0 rgba(0,0,0,0.12) !important; margin:45px auto 25px !important; max-width:520px !important; letter-spacing:-0.5px !important; text-shadow:0 2px 6px rgba(0,0,0,0.25) !important; border:3px solid rgba(255,255,255,0.3) !important;">🔥 [주제에 맞는 강력한 CTA 문구]</a>
+  [라스트팡 CTA] (마무리 섹션 - 반드시 작성!):
+  <a href="#" style="display:block !important; text-align:center !important; padding:26px 52px !important; background:${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:22px !important; font-weight:900 !important; font-size:24px !important; box-shadow:0 18px 45px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15), inset 0 -4px 0 rgba(0,0,0,0.12) !important; margin:45px auto 25px !important; max-width:520px !important; letter-spacing:-0.5px !important; text-shadow:0 2px 6px rgba(0,0,0,0.25) !important; border:3px solid rgba(255,255,255,0.3) !important;">🔥 [주제에 맞는 강력한 CTA 문구]</a>
   
   ⚠️ 다시 한번 강조: 3개 CTA 버튼 모두 다른 문구 사용! 복붙 금지!
 
@@ -426,6 +435,25 @@ const getSystemInstruction = (customInstruction: string, template: typeof TEMPLA
   [출력 구조]
   ══════════════════════════════════════════════════════════════════
   
+  ⚠️ 필수 완성 요소 (하나라도 빠지면 실격!):
+  
+  ✅ [TITLE]...[/TITLE] - 제목
+  ✅ [EXCERPT]...[/EXCERPT] - 메타 설명 (150자)
+  ✅ [THUMBNAIL_TEXT]...[/THUMBNAIL_TEXT] - 썸네일 텍스트
+  ✅ [CONTENT]
+      ├─ 서론 (2-3문단)
+      ├─ [AD1]
+      ├─ H2 #1 + H3들 + CTA 버튼 1
+      ├─ [AD2]
+      ├─ H2 #2 + H3들 + CTA 버튼 2
+      ├─ H2 #3 + H3들
+      ├─ H2 #4 + H3들 (토큰 제한 시 생략 가능)
+      ├─ 마무리 (200자)
+      └─ 라스트팡 CTA 버튼 3
+     [/CONTENT] ← 이 닫는 태그까지 반드시 작성!
+  
+  🚨 중요: [/CONTENT] 태그가 없으면 글이 미완성으로 간주됩니다!
+  
   ⚠️ 제목 규칙 (매우 중요!):
   - 사용자가 "주제 /// 키워드" 형식으로 입력한 경우:
     → [TITLE]에는 반드시 앞부분(주제)을 그대로 사용!
@@ -439,22 +467,30 @@ const getSystemInstruction = (customInstruction: string, template: typeof TEMPLA
   [EXCERPT]150자 메타 디스크립션 (HTML 태그 없이 순수 텍스트만!)[/EXCERPT]
   [THUMBNAIL_TEXT]썸네일 텍스트
   
-  ⚠️ 썸네일 텍스트 작성 규칙:
-  - 사용자 제목을 기반으로 하되, 더 짧고 임팩트 있게!
-  - 한 줄에 10-12자 정도로 짧게 끊어서!
-  - 2-3줄로 구성
-  - 물음표(?)나 느낌표(!)로 끝내기
-  - 공백으로 단어를 구분하여 자연스러운 줄바꿈 유도
+  ⚠️ 썸네일 텍스트 작성 규칙 (매우 중요!):
   
-  예시:
-  - 제목: "올리브영 고객센터 전화번호 & 운영시간, 상담원 연결 가장 빠른 방법"
-    썸네일: "올리브영 고객센터 전화번호 운영시간 빠른 연결법!"
+  📌 핵심 원칙:
+  - 전체 20자 이내! (공백 포함)
+  - 제목의 핵심 메시지만 추출!
+  - 긴 제목 그대로 쓰지 말고 핵심만!
   
-  - 제목: "2026년 소상공인 지원사업 통합 공고"
-    썸네일: "2026년 소상공인 지원사업 통합 공고!"
+  📌 추출 방법:
+  1. 제목에서 가장 중요한 키워드 2-3개만 선택
+  2. 행동/결과를 나타내는 짧은 문구로 변환
+  3. 느낌표(!)로 마무리
   
-  - 제목: "신한은행 공동인증서 발급 방법"
-    썸네일: "신한은행 공동인증서 3분만에 발급!"
+  📌 예시:
+  ❌ 나쁜 예 (너무 김): "패딩 드라이클리닝 절대 금지 집에서 패딩 세탁기 돌리는 완벽 가이드 중성세제 기준"
+  ✅ 좋은 예 (핵심만): "패딩 집에서 세탁하는 법!"
+  
+  ❌ 나쁜 예: "올리브영 고객센터 전화번호 & 운영시간, 상담원 연결 가장 빠른 방법"
+  ✅ 좋은 예: "올리브영 고객센터 빠른 연결!"
+  
+  ❌ 나쁜 예: "2026년 현실적인 다이어트 식단표 작심삼일 탈출 2주 루틴 정리"
+  ✅ 좋은 예: "2026 다이어트 2주 루틴!"
+  
+  ❌ 나쁜 예: "신한은행 공동인증서 발급 방법 완벽 가이드"
+  ✅ 좋은 예: "신한 공동인증서 발급!"
   
   [/THUMBNAIL_TEXT]
   [CONTENT]HTML 본문 (본인 소개, 요약 섹션, 마크다운 문법 절대 금지!)[/CONTENT]`;
@@ -556,19 +592,21 @@ export const generateSEOContent = async (
 핵심키워드: ${mainKeyword}
 
 ⚠️ 중요 지침:
-1. 테마 "${randomTemplate.name}"를 적용해서 사람이 직접 쓴 것처럼 자연스러운 블로그 글 작성
-2. 절대 본인 소개나 요약 섹션을 넣지 마세요!
-3. 마크다운 문법(**, *, #, -, > 등) 절대 사용 금지! HTML 태그만 사용!
-4. [TITLE]에는 사용자가 제공한 제목 "${displayTitle}"을 그대로 사용!
-5. 하이퍼링크는 반드시 실존하는 공식 사이트만! (정부기관, 금융기관, 언론사)
-6. 존재하지 않는 사이트 이름 절대 금지! (예: 내국위키, 정책위키)
-7. 적절한 링크 없으면 구글 검색 페이지 사용
-8. CTA 버튼은 심리 트리거 문구 사용! "지금 바로 시작하세요" 금지!
-9. 사용자가 제목/키워드에 년도 명시했으면 그대로 사용, 아니면 시점 표현 빼기!
-10. 썸네일 텍스트는 짧게 끊어서 공백 기준으로 자연스럽게 줄바꿈되도록!`,
+1. 🚨 반드시 [/CONTENT] 닫는 태그까지 완성! (최우선!)
+2. 라스트팡 CTA 버튼까지 모두 작성 후 마무리!
+3. 테마 "${randomTemplate.name}"를 적용해서 사람이 직접 쓴 것처럼 자연스러운 블로그 글 작성
+4. 절대 본인 소개나 요약 섹션을 넣지 마세요!
+5. 마크다운 문법(**, *, #, -, > 등) 절대 사용 금지! HTML 태그만 사용!
+6. [TITLE]에는 사용자가 제공한 제목 "${displayTitle}"을 그대로 사용!
+7. 하이퍼링크는 반드시 실존하는 공식 사이트만! (정부기관, 금융기관, 언론사)
+8. 존재하지 않는 사이트 이름 절대 금지! (예: 내국위키, 정책위키)
+9. 적절한 링크 없으면 구글 검색 페이지 사용
+10. CTA 버튼 3개 모두 주제에 맞게 다르게 작성! 예시 복붙 금지!
+11. 사용자가 제목/키워드에 년도 명시했으면 그대로 사용, 아니면 시점 표현 빼기!
+12. 썸네일 텍스트는 20자 이내! 핵심만 짧게!`,
         config: {
           systemInstruction: getSystemInstruction(config.customInstruction || '', randomTemplate),
-          maxOutputTokens: 20000,
+          maxOutputTokens: 50000,
           thinkingConfig: { thinkingBudget: 0 }
         }
       });
@@ -576,6 +614,19 @@ export const generateSEOContent = async (
       if (!response || !response.text) throw new Error("AI 응답 없음");
 
       const text = response.text || "";
+
+      // 완성도 체크
+      const hasClosingTag = text.includes('[/CONTENT]');
+      const hasLastCTA = text.includes('padding:26px 52px');
+
+      if (!hasClosingTag) {
+        console.warn('⚠️ 글이 미완성 상태 (닫는 태그 없음)');
+      }
+
+      if (!hasLastCTA) {
+        console.warn('⚠️ 라스트팡 CTA 버튼 누락');
+      }
+
       const extract = (tag: string) => {
         const s = `[${tag}]`, e = `[/${tag}]`;
         const start = text.indexOf(s);
@@ -586,6 +637,19 @@ export const generateSEOContent = async (
 
       let content = extract("CONTENT");
       if (!content) throw new Error("본문 생성 실패");
+
+      // 강제 마무리 추가 (닫는 태그 없고 마지막 CTA도 없으면)
+      if (!hasClosingTag && !hasLastCTA) {
+        console.log('🔧 강제 마무리 추가 중...');
+        content += `
+        
+        <p style="margin:40px 0 20px 0 !important; text-align:center !important; font-size:16px !important; color:#666 !important; line-height:1.8 !important;">
+        이렇게 해보니까 생각보다 어렵지 않더라구요. 여러분도 한번 시도해보세요!
+        </p>
+        
+        <a href="#" style="display:block !important; text-align:center !important; padding:26px 52px !important; background:${randomTemplate.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:22px !important; font-weight:900 !important; font-size:24px !important; box-shadow:0 18px 45px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15), inset 0 -4px 0 rgba(0,0,0,0.12) !important; margin:45px auto 25px !important; max-width:520px !important; letter-spacing:-0.5px !important; text-shadow:0 2px 6px rgba(0,0,0,0.25) !important; border:3px solid rgba(255,255,255,0.3) !important;">🔥 지금 바로 확인하기</a>
+        `;
+      }
 
       const ad1Wrapper = config.adCode1 ? `<div style="margin:20px 0 !important; text-align:center !important;">${config.adCode1}</div>` : '';
       const ad2Wrapper = config.adCode2 ? `<div style="margin:20px 0 !important; text-align:center !important;">${config.adCode2}</div>` : '';
