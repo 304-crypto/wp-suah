@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AppStatus, WordPressConfig, GeneratedPost, BulkItem, DashboardStats, SiteProfile, AppSettings } from './types';
 import { generateSEOContent } from './services/geminiService';
-import { publishToWordPress, fetchPostStats, fetchScheduledPosts } from './services/wordPressService';
+import { publishToWordPress, fetchPostStats, fetchScheduledPosts, uploadMediaToWordPress } from './services/wordPressService';
 import SettingsModal from './components/SettingsModal';
 import PreviewModal from './components/PreviewModal';
 
@@ -307,6 +307,26 @@ const App: React.FC = () => {
       }
 
       setQueue(prev => prev.map((it, idx) => idx === index ? { ...it, status: 'publishing', result: post } : it));
+
+      // 🆕 썸네일을 미디어 라이브러리에 업로드 (FIFU 호환)
+      if (post.thumbnailData) {
+        try {
+          const filename = `thumbnail-${Date.now()}`;
+          const mediaUrl = await uploadMediaToWordPress(config, `data:image/webp;base64,${post.thumbnailData}`, filename);
+
+          if (mediaUrl) {
+            // base64를 실제 URL로 교체
+            post.content = post.content.replace(
+              /src="data:image\/webp;base64,[^"]+"/g,
+              `src="${mediaUrl}"`
+            );
+            post.featuredMediaUrl = mediaUrl;
+            console.log('✅ 썸네일 업로드 완료:', mediaUrl);
+          }
+        } catch (e) {
+          console.warn('썸네일 업로드 실패, base64 유지:', e);
+        }
+      }
 
       const wpResult = await publishToWordPress(config, post);
       post.id = wpResult.id;
