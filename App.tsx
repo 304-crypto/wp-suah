@@ -280,8 +280,27 @@ const App: React.FC = () => {
 
     try {
       const post = await generateSEOContent(items[index].topic, config, handleKeyIndexChange);
-      post.status = scheduleConfig.status;
-      post.date = items[index].scheduledDate;
+
+      // 🆕 스마트 스케줄링: 과거면 즉시발행, 미래면 예약
+      const scheduledDate = items[index].scheduledDate;
+      if (scheduledDate) {
+        const scheduleTime = new Date(scheduledDate).getTime();
+        const now = Date.now();
+
+        if (scheduleTime <= now) {
+          // 과거 또는 현재 → 즉시 발행
+          post.status = 'publish';
+          post.date = scheduledDate;
+          console.log(`📤 즉시발행: ${scheduledDate} (과거)`);
+        } else {
+          // 미래 → 예약
+          post.status = 'future';
+          post.date = scheduledDate;
+          console.log(`⏰ 예약발행: ${scheduledDate} (미래)`);
+        }
+      } else {
+        post.status = scheduleConfig.status;
+      }
 
       if (config.defaultCategoryId) {
         post.categories = [parseInt(config.defaultCategoryId)];
