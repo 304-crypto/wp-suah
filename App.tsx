@@ -38,14 +38,8 @@ const DEFAULT_SETTINGS: AppSettings = {
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'writer' | 'manager'>('writer');
 
-  // 🆕 글 작성 목록 자동저장 (localStorage에서 불러오기)
-  const [bulkInput, setBulkInput] = useState(() => {
-    try {
-      return localStorage.getItem('wp-bulk-input') || '';
-    } catch {
-      return '';
-    }
-  });
+  // 🆕 글 작성 목록 자동저장 (현재 프로필 기준)
+  const [bulkInput, setBulkInput] = useState('');
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
   const [queue, setQueue] = useState<BulkItem[]>([]);
 
@@ -273,16 +267,28 @@ const App: React.FC = () => {
     loadFromCloud();
   }, [user]);
 
-  // 💾 글 작성 목록 변경 시 자동 저장
+  // 🔄 프로필 전환 시 해당 프로필의 글 목록 불러오기
   useEffect(() => {
-    if (isConfigLoaded) {
+    if (isConfigLoaded && currentProfileId) {
       try {
-        localStorage.setItem('wp-bulk-input', bulkInput);
+        const savedInput = localStorage.getItem(`wp-bulk-input-${currentProfileId}`) || '';
+        setBulkInput(savedInput);
+      } catch (e) {
+        console.error('글 목록 불러오기 실패:', e);
+      }
+    }
+  }, [currentProfileId, isConfigLoaded]);
+
+  // 💾 글 작성 목록 변경 시 자동 저장 (프로필별)
+  useEffect(() => {
+    if (isConfigLoaded && currentProfileId) {
+      try {
+        localStorage.setItem(`wp-bulk-input-${currentProfileId}`, bulkInput);
       } catch (e) {
         console.error('글 목록 저장 실패:', e);
       }
     }
-  }, [bulkInput, isConfigLoaded]);
+  }, [bulkInput, isConfigLoaded, currentProfileId]);
 
   // 💾 스케줄 설정 변경 시 자동 저장
   useEffect(() => {
