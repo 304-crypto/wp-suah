@@ -3,14 +3,10 @@ export interface ThumbnailConfig {
   bgColor?: string;
   textColor?: string;
   borderColor?: string;
-  fontSize?: number;
-  fontWeight?: string;
-  lineHeight?: number;
-  borderWidth?: number;
 }
 
 /**
- * 🎨 고대비 컬러 테마 (보색 대비)
+ * 🎨 고대비 컬러 테마
  */
 const HIGH_CONTRAST_THEMES = [
   { bg: '#FFFFFF', text: '#0066FF', border: '#0066FF' },
@@ -23,23 +19,89 @@ const HIGH_CONTRAST_THEMES = [
   { bg: '#FFFFFF', text: '#FF6B35', border: '#FF6B35' },
 ];
 
-/**
- * 🎲 랜덤 고대비 테마 선택
- */
 function getRandomTheme() {
-  const randomIndex = Math.floor(Math.random() * HIGH_CONTRAST_THEMES.length);
-  return HIGH_CONTRAST_THEMES[randomIndex];
+  return HIGH_CONTRAST_THEMES[Math.floor(Math.random() * HIGH_CONTRAST_THEMES.length)];
 }
 
 /**
- * 신한은행 스타일 고임팩트 썸네일 렌더러
+ * 📐 3줄 균형 잡힌 줄바꿈 (문맥 유지)
  * 
- * ✅ 대형 굵은 글씨 (가독성 최우선)
- * ✅ 두꺼운 단일 보더 (심플하고 강렬)
- * ✅ 랜덤 고대비 보색 테마
- * ✅ 중앙 정렬 (수평/수직)
- * ✅ 자연스러운 줄바꿈 (공백 → 구두점 → 글자 순)
- * ✅ HTML 태그 자동 제거
+ * 목표:
+ * - 정확히 3줄로 배치
+ * - 각 줄 길이 비슷하게 (균형)
+ * - 단어 단위로 끊기 (자연스러운 문맥)
+ */
+function balancedWrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.trim().split(/\s+/);
+
+  if (words.length === 0) return [''];
+  if (words.length === 1) return [words[0]];
+  if (words.length === 2) return words;
+
+  // 3줄 목표로 단어 분배
+  const totalChars = words.reduce((sum, w) => sum + w.length, 0);
+  const targetCharsPerLine = Math.ceil(totalChars / 3);
+
+  const lines: string[] = [];
+  let currentLine = '';
+  let currentChars = 0;
+
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    const testLine = currentLine ? currentLine + ' ' + word : word;
+
+    // 줄 바꿈 조건 체크
+    const shouldBreak =
+      // 1. 현재 줄이 목표 글자수에 도달했고, 아직 3줄 미만이면
+      (currentChars + word.length >= targetCharsPerLine && lines.length < 2 && currentLine) ||
+      // 2. 또는 현재 줄이 maxWidth를 초과하면
+      (ctx.measureText(testLine).width > maxWidth && currentLine);
+
+    if (shouldBreak) {
+      lines.push(currentLine);
+      currentLine = word;
+      currentChars = word.length;
+    } else {
+      currentLine = testLine;
+      currentChars += word.length;
+    }
+  }
+
+  // 마지막 줄 추가
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  // 3줄 초과시 마지막 줄들 합치기
+  while (lines.length > 3) {
+    const last = lines.pop()!;
+    lines[lines.length - 1] += ' ' + last;
+  }
+
+  // 각 줄이 maxWidth 초과하는지 최종 체크
+  return lines.map(line => {
+    if (ctx.measureText(line).width <= maxWidth) {
+      return line;
+    }
+    // 초과하면 앞부분만 (글자 단위)
+    let trimmed = '';
+    for (const char of line) {
+      if (ctx.measureText(trimmed + char + '...').width > maxWidth) {
+        return trimmed + '...';
+      }
+      trimmed += char;
+    }
+    return trimmed;
+  });
+}
+
+/**
+ * 🎨 깔끔한 3줄 썸네일 렌더러
+ * 
+ * ✅ 3줄로 깔끔하게
+ * ✅ 여백 충분히 (위/아래/좌/우)
+ * ✅ 텍스트 안 짤림
+ * ✅ 문맥에 맞게 자연스러운 줄바꿈
  */
 export const renderThumbnailToBase64 = async (config: ThumbnailConfig): Promise<string> => {
   const canvas = document.createElement('canvas');
@@ -51,181 +113,76 @@ export const renderThumbnailToBase64 = async (config: ThumbnailConfig): Promise<
 
   await document.fonts.ready;
 
-  // ═══════════════════════════════════════════════════════════
-  // 0. HTML 태그 제거 및 컬러 테마 자동 선택
-  // ═══════════════════════════════════════════════════════════
-  const cleanText = config.text.replace(/<[^>]*>/g, '').trim();
-  
-  const theme = (config.bgColor && config.textColor && config.borderColor) 
+  const theme = (config.bgColor && config.textColor && config.borderColor)
     ? { bg: config.bgColor, text: config.textColor, border: config.borderColor }
     : getRandomTheme();
 
-  const bgColor = theme.bg;
-  const textColor = theme.text;
-  const borderColor = theme.border;
-  const borderWidth = config.borderWidth || 20;
-  const fontWeight = config.fontWeight || 'bold';
+  // ═══════════════════════════════════════════════════════════
+  // 1. 배경 + 테두리
+  // ═══════════════════════════════════════════════════════════
+  const borderWidth = 18;
 
-  // ═══════════════════════════════════════════════════════════
-  // 1. 배경 채우기
-  // ═══════════════════════════════════════════════════════════
-  ctx.fillStyle = bgColor;
+  ctx.fillStyle = theme.bg;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // ═══════════════════════════════════════════════════════════
-  // 2. 두꺼운 단일 테두리
-  // ═══════════════════════════════════════════════════════════
-  ctx.strokeStyle = borderColor;
+  ctx.strokeStyle = theme.border;
   ctx.lineWidth = borderWidth;
-  ctx.strokeRect(
-    borderWidth / 2,
-    borderWidth / 2,
-    canvas.width - borderWidth,
-    canvas.height - borderWidth
-  );
+  ctx.strokeRect(borderWidth / 2, borderWidth / 2, canvas.width - borderWidth, canvas.height - borderWidth);
 
   // ═══════════════════════════════════════════════════════════
-  // 3. 자연스러운 줄바꿈 (공백 → 구두점 → 글자 순)
+  // 2. 텍스트 영역 설정 (적절한 여백)
   // ═══════════════════════════════════════════════════════════
-  const padding = 80;
+  const padding = 45; // 좌우 여백 (너무 많지 않게)
   const maxWidth = canvas.width - (padding * 2);
 
-  let fontSize = 90;
-  ctx.font = `${fontWeight} ${fontSize}px 'NanumSquareNeo', 'Pretendard', sans-serif`;
-
-  /**
-   * 한글 줄바꿈 로직 개선:
-   * 1. 공백 기준 단어 분리 (우선)
-   * 2. 단어가 너무 길면 구두점 기준 분리
-   * 3. 그래도 안 되면 글자 단위 분리
-   */
-  const wrapText = (text: string, maxWidth: number): string[] => {
-    const lines: string[] = [];
-    
-    // 1단계: 공백 기준 단어 분리
-    const words = text.split(' ');
-    let currentLine = '';
-
-    for (const word of words) {
-      const testLine = currentLine ? currentLine + ' ' + word : word;
-      const metrics = ctx.measureText(testLine);
-
-      if (metrics.width > maxWidth && currentLine !== '') {
-        lines.push(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = testLine;
-      }
-    }
-
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-
-    // 2단계: 여전히 너무 긴 줄이 있으면 구두점 기준으로 재분리
-    const finalLines: string[] = [];
-    for (const line of lines) {
-      const metrics = ctx.measureText(line);
-      
-      if (metrics.width > maxWidth) {
-        // 구두점 기준 분리
-        const segments = line.split(/([,?!.])/);
-        let subLine = '';
-        
-        for (const segment of segments) {
-          if (!segment) continue;
-          
-          const testSub = subLine + segment;
-          const subMetrics = ctx.measureText(testSub);
-          
-          if (subMetrics.width > maxWidth && subLine !== '') {
-            finalLines.push(subLine.trim());
-            subLine = segment;
-          } else {
-            subLine = testSub;
-          }
-        }
-        
-        if (subLine.trim()) {
-          finalLines.push(subLine.trim());
-        }
-      } else {
-        finalLines.push(line);
-      }
-    }
-
-    // 3단계: 그래도 안 되면 글자 단위 분리
-    if (finalLines.some(line => ctx.measureText(line).width > maxWidth)) {
-      const charLines: string[] = [];
-      for (const line of finalLines) {
-        const metrics = ctx.measureText(line);
-        
-        if (metrics.width > maxWidth) {
-          let charLine = '';
-          for (const char of line) {
-            const test = charLine + char;
-            const m = ctx.measureText(test);
-            
-            if (m.width > maxWidth && charLine !== '') {
-              charLines.push(charLine);
-              charLine = char;
-            } else {
-              charLine = test;
-            }
-          }
-          if (charLine) {
-            charLines.push(charLine);
-          }
-        } else {
-          charLines.push(line);
-        }
-      }
-      return charLines;
-    }
-
-    return finalLines.length > 0 ? finalLines : lines;
-  };
-
-  // 3줄 이하로 맞추기 위한 폰트 크기 자동 조절
-  let lines = wrapText(cleanText, maxWidth);
-
-  while (lines.length > 3 && fontSize > 50) {
-    fontSize -= 5;
-    ctx.font = `${fontWeight} ${fontSize}px 'NanumSquareNeo', 'Pretendard', sans-serif`;
-    lines = wrapText(cleanText, maxWidth);
-  }
-
-  // 강제로 3줄 제한 (... 없이)
-  if (lines.length > 3) {
-    lines = lines.slice(0, 3);
-  }
+  // 텍스트 정리 (HTML 태그 제거)
+  const text = config.text.replace(/<[^>]*>/g, '').trim();
 
   // ═══════════════════════════════════════════════════════════
-  // 4. 중앙 정렬 (수직 + 수평)
+  // 3. 폰트 크기 자동 조절 (70px → 34px)
   // ═══════════════════════════════════════════════════════════
-  const lineHeight = fontSize * 1.3;
+  const fontSizes = [70, 64, 58, 52, 48, 44, 40, 36, 34];
+  let lines: string[] = [];
+  let finalFontSize = 52;
+
+  for (const fontSize of fontSizes) {
+    ctx.font = `900 ${fontSize}px 'NanumSquareNeo', 'Pretendard', sans-serif`;
+    lines = balancedWrap(ctx, text, maxWidth);
+
+    // 모든 줄이 maxWidth 안에 들어오는지 확인
+    const allFit = lines.every(line => ctx.measureText(line).width <= maxWidth);
+
+    // 3줄 이하이고 모든 줄이 들어오면 OK
+    if (lines.length <= 3 && allFit) {
+      finalFontSize = fontSize;
+      break;
+    }
+  }
+
+  // 최종 폰트 적용
+  ctx.font = `900 ${finalFontSize}px 'NanumSquareNeo', 'Pretendard', sans-serif`;
+  lines = balancedWrap(ctx, text, maxWidth);
+
+  // ═══════════════════════════════════════════════════════════
+  // 4. 중앙 정렬 렌더링
+  // ═══════════════════════════════════════════════════════════
+  const lineHeight = finalFontSize * 1.35; // 줄 간격
   const totalHeight = lines.length * lineHeight;
-  let currentY = (canvas.height - totalHeight) / 2 + (lineHeight * 0.35);
 
-  // ═══════════════════════════════════════════════════════════
-  // 5. 텍스트 렌더링 (심플하게, 그림자 없음)
-  // ═══════════════════════════════════════════════════════════
-  ctx.fillStyle = textColor;
+  // 수직 중앙 정렬 (위아래 여백 동일)
+  let y = (canvas.height - totalHeight) / 2 + finalFontSize * 0.25;
+
+  ctx.fillStyle = theme.text;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
 
-  lines.forEach((line) => {
-    ctx.fillText(line, canvas.width / 2, currentY);
-    currentY += lineHeight;
-  });
+  for (const line of lines) {
+    ctx.fillText(line, canvas.width / 2, y);
+    y += lineHeight;
+  }
 
   // ═══════════════════════════════════════════════════════════
-  // 6. WebP 고품질 변환
+  // 5. WebP 출력
   // ═══════════════════════════════════════════════════════════
   return canvas.toDataURL('image/webp', 0.95).split(',')[1];
 };
