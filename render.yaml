@@ -1,0 +1,13 @@
+
+services:
+  - type: web
+    name: gem-seo-publisher
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: API_KEY
+        sync: false
+        description: "Google Gemini API Key"
+      - key: NODE_VERSION
+        value: "18"
