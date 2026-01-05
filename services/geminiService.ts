@@ -753,11 +753,27 @@ export const generateSEOContent = async (
     } catch (error: any) {
       lastError = error;
 
-      if (isQuotaError(error)) {
-        console.warn(`API 키 #${keyManager.getCurrentIndex() + 1} 할당량 소진, 다음 키로 전환 시도...`);
+      // 🔍 디버깅: 에러 객체 상세 로깅
+      console.error('❌ API 에러 발생:', {
+        message: error.message,
+        status: error.status,
+        code: error.code,
+        name: error.name,
+        fullError: JSON.stringify(error, null, 2)
+      });
+
+      // 🔧 개선된 에러 감지: 다양한 속성 확인
+      const isBlockedError = isQuotaError(error) ||
+        error.status === 403 ||
+        error.code === 403 ||
+        (error.message && error.message.includes('Forbidden'));
+
+      if (isBlockedError) {
+        console.warn(`🔄 API 키 #${keyManager.getCurrentIndex() + 1} 문제 감지! 다음 키로 전환 시도...`);
         if (!keyManager.rotateToNext()) {
-          throw new Error(`모든 API 키(${keyManager.getKeyCount()}개) 할당량이 소진되었습니다. 잠시 후 다시 시도해주세요.`);
+          throw new Error(`모든 API 키(${keyManager.getKeyCount()}개)에 문제가 있습니다. 새 API 키를 추가해주세요.`);
         }
+        console.log(`✅ API 키 #${keyManager.getCurrentIndex() + 1}로 전환 완료!`);
         continue;
       }
 
