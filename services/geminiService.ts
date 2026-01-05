@@ -359,9 +359,8 @@ const getSystemInstruction = (customInstruction: string, template: typeof TEMPLA
   
   📌 최소 개수: 전체 글에 5개 이상
   
-  📌 스타일 적용:
-  <a href="실제URL" target="_blank" rel="noopener noreferrer" style="color:${template.h3Color} !important; font-weight:700 !important; text-decoration:underline !important; text-underline-offset:4px !important;">명확한 링크텍스트</a>
-  
+  📌 링크 스타일 (새 창 열기 금지! 애드센스 전면광고 위해):
+  <a href="실제URL" style="color:${template.h3Color} !important; font-weight:700 !important; text-decoration:underline !important; text-underline-offset:4px !important;">명확한 링크텍스트</a>
   ⚠️ 핵심: 
   - 링크는 반드시 실존하는 공식 사이트만!
   - 링크 텍스트는 목적지가 명확하게!
