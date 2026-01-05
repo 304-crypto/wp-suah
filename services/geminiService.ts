@@ -14,6 +14,7 @@ const TEMPLATES = [
     h3Color: '#1a73e8',
     buttonColor: '#1565C0',
     ctaGradient: 'linear-gradient(135deg, #FF6B35, #F7931E, #FFD23F)',
+    ctaTextColor: '#FFFFFF', // 오렌지 배경 → 흰색 텍스트
     thumbnailBg: '#1a73e8',
     thumbnailText: '#FFFFFF',
     thumbnailBorder: '#004d99'
@@ -26,6 +27,7 @@ const TEMPLATES = [
     h3Color: '#28a745',
     buttonColor: '#FF5722',
     ctaGradient: 'linear-gradient(135deg, #FF5722, #FF7043, #FFAB40)',
+    ctaTextColor: '#FFFFFF', // 오렌지 배경 → 흰색 텍스트
     thumbnailBg: '#28a745',
     thumbnailText: '#FFFFFF',
     thumbnailBorder: '#1e7e34'
@@ -38,6 +40,7 @@ const TEMPLATES = [
     h3Color: '#6a1b9a',
     buttonColor: '#FFC107',
     ctaGradient: 'linear-gradient(135deg, #FFC107, #FFD54F, #FFEB3B)',
+    ctaTextColor: '#333333', // 🔧 노랑 배경 → 어두운 텍스트 (가독성 개선)
     thumbnailBg: '#6a1b9a',
     thumbnailText: '#FFFFFF',
     thumbnailBorder: '#4a148c'
@@ -50,6 +53,7 @@ const TEMPLATES = [
     h3Color: '#00796b',
     buttonColor: '#E91E63',
     ctaGradient: 'linear-gradient(135deg, #E91E63, #F06292, #FF80AB)',
+    ctaTextColor: '#FFFFFF', // 핑크 배경 → 흰색 텍스트
     thumbnailBg: '#00796b',
     thumbnailText: '#FFFFFF',
     thumbnailBorder: '#004d40'
@@ -62,6 +66,7 @@ const TEMPLATES = [
     h3Color: '#8b4513',
     buttonColor: '#BF360C',
     ctaGradient: 'linear-gradient(135deg, #00BCD4, #26C6DA, #4DD0E1)',
+    ctaTextColor: '#FFFFFF', // 시안 배경 → 흰색 텍스트
     thumbnailBg: '#a0522d',
     thumbnailText: '#FFFFFF',
     thumbnailBorder: '#8b4513'
@@ -74,6 +79,7 @@ const TEMPLATES = [
     h3Color: '#004d99',
     buttonColor: '#0D47A1',
     ctaGradient: 'linear-gradient(135deg, #FF9800, #FFB74D, #FFCC80)',
+    ctaTextColor: '#333333', // 🔧 밝은 오렌지 배경 → 어두운 텍스트 (가독성 개선)
     thumbnailBg: '#0D47A1',
     thumbnailText: '#FFFFFF',
     thumbnailBorder: '#1A237E'
@@ -86,6 +92,7 @@ const TEMPLATES = [
     h3Color: '#1e7e34',
     buttonColor: '#2E7D32',
     ctaGradient: 'linear-gradient(135deg, #E91E63, #EC407A, #F48FB1)',
+    ctaTextColor: '#FFFFFF', // 핑크 배경 → 흰색 텍스트
     thumbnailBg: '#2E7D32',
     thumbnailText: '#FFFFFF',
     thumbnailBorder: '#1B5E20'
@@ -98,6 +105,7 @@ const TEMPLATES = [
     h3Color: '#4a148c',
     buttonColor: '#6A1B9A',
     ctaGradient: 'linear-gradient(135deg, #CDDC39, #D4E157, #E6EE9C)',
+    ctaTextColor: '#333333', // 🔧 라임 배경 → 어두운 텍스트 (가독성 개선)
     thumbnailBg: '#6A1B9A',
     thumbnailText: '#FFFFFF',
     thumbnailBorder: '#38006b'
@@ -110,6 +118,7 @@ const TEMPLATES = [
     h3Color: '#004d40',
     buttonColor: '#00838F',
     ctaGradient: 'linear-gradient(135deg, #FF5252, #FF8A80, #FFCDD2)',
+    ctaTextColor: '#FFFFFF', // 레드 배경 → 흰색 텍스트
     thumbnailBg: '#00838F',
     thumbnailText: '#FFFFFF',
     thumbnailBorder: '#006064'
@@ -122,6 +131,7 @@ const TEMPLATES = [
     h3Color: '#8b4513',
     buttonColor: '#D84315',
     ctaGradient: 'linear-gradient(135deg, #03A9F4, #29B6F6, #81D4FA)',
+    ctaTextColor: '#FFFFFF', // 스카이블루 배경 → 흰색 텍스트
     thumbnailBg: '#D84315',
     thumbnailText: '#FFFFFF',
     thumbnailBorder: '#BF360C'
@@ -433,10 +443,10 @@ const getSystemInstruction = (customInstruction: string, template: typeof TEMPLA
   📌 CTA 버튼 스타일:
   
   [일반 CTA] (첫 번째 H2 후, 두 번째 H2 후):
-  <a href="javascript:void(0)" style="display:block !important; text-align:center !important; padding:22px 44px !important; background:${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:18px !important; font-weight:900 !important; font-size:20px !important; box-shadow:0 12px 30px rgba(0,0,0,0.25), inset 0 -3px 0 rgba(0,0,0,0.1) !important; margin:35px auto !important; max-width:480px !important; letter-spacing:-0.3px !important; text-shadow:0 2px 4px rgba(0,0,0,0.2) !important;">[이모지] [주제에 맞는 CTA 문구]</a>
+  <a href="javascript:void(0)" style="display:block !important; text-align:center !important; padding:22px 44px !important; background:${template.ctaGradient} !important; color:${template.ctaTextColor} !important; text-decoration:none !important; border-radius:18px !important; font-weight:900 !important; font-size:20px !important; box-shadow:0 12px 30px rgba(0,0,0,0.25), inset 0 -3px 0 rgba(0,0,0,0.1) !important; margin:35px auto !important; max-width:480px !important; letter-spacing:-0.3px !important; text-shadow:none !important;">[이모지] [주제에 맞는 CTA 문구]</a>
   
   [라스트팡 CTA] (마무리 섹션 - 반드시 작성!):
-  <a href="javascript:void(0)" style="display:block !important; text-align:center !important; padding:26px 52px !important; background:${template.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:22px !important; font-weight:900 !important; font-size:24px !important; box-shadow:0 18px 45px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15), inset 0 -4px 0 rgba(0,0,0,0.12) !important; margin:45px auto 25px !important; max-width:520px !important; letter-spacing:-0.5px !important; text-shadow:0 2px 6px rgba(0,0,0,0.25) !important; border:3px solid rgba(255,255,255,0.3) !important;">🔥 [주제에 맞는 강력한 CTA 문구]</a>
+  <a href="javascript:void(0)" style="display:block !important; text-align:center !important; padding:26px 52px !important; background:${template.ctaGradient} !important; color:${template.ctaTextColor} !important; text-decoration:none !important; border-radius:22px !important; font-weight:900 !important; font-size:24px !important; box-shadow:0 18px 45px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15), inset 0 -4px 0 rgba(0,0,0,0.12) !important; margin:45px auto 25px !important; max-width:520px !important; letter-spacing:-0.5px !important; text-shadow:none !important; border:3px solid rgba(255,255,255,0.3) !important;">🔥 [주제에 맞는 강력한 CTA 문구]</a>
   
   ⚠️ 다시 한번 강조: 3개 CTA 버튼 모두 다른 문구 사용! 복붙 금지!
 
@@ -682,7 +692,7 @@ export const generateSEOContent = async (
         이렇게 해보니까 생각보다 어렵지 않더라구요. 여러분도 한번 시도해보세요!
         </p>
         
-        <a href="#" style="display:block !important; text-align:center !important; padding:26px 52px !important; background:${randomTemplate.ctaGradient} !important; color:#fff !important; text-decoration:none !important; border-radius:22px !important; font-weight:900 !important; font-size:24px !important; box-shadow:0 18px 45px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15), inset 0 -4px 0 rgba(0,0,0,0.12) !important; margin:45px auto 25px !important; max-width:520px !important; letter-spacing:-0.5px !important; text-shadow:0 2px 6px rgba(0,0,0,0.25) !important; border:3px solid rgba(255,255,255,0.3) !important;">🔥 지금 바로 확인하기</a>
+        <a href="javascript:void(0)" style="display:block !important; text-align:center !important; padding:26px 52px !important; background:${randomTemplate.ctaGradient} !important; color:${randomTemplate.ctaTextColor} !important; text-decoration:none !important; border-radius:22px !important; font-weight:900 !important; font-size:24px !important; box-shadow:0 18px 45px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15), inset 0 -4px 0 rgba(0,0,0,0.12) !important; margin:45px auto 25px !important; max-width:520px !important; letter-spacing:-0.5px !important; text-shadow:none !important; border:3px solid rgba(255,255,255,0.3) !important;">🔥 지금 바로 확인하기</a>
         `;
       }
 
