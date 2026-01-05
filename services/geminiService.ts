@@ -591,7 +591,12 @@ function isQuotaError(error: any): boolean {
     msg.includes('rate limit') ||
     msg.includes('429') ||
     msg.includes('resource exhausted') ||
-    msg.includes('limit exceeded');
+    msg.includes('limit exceeded') ||
+    // 🆕 정지된 API 키도 감지하여 다음 키로 자동 전환
+    msg.includes('suspended') ||
+    msg.includes('403') ||
+    msg.includes('permission denied') ||
+    msg.includes('consumer_suspended');
 }
 
 export const generateSEOContent = async (
